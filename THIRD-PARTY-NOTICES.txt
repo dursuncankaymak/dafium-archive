@@ -1,0 +1,45 @@
+Dafium Arşiv — Third-party notices / Üçüncü taraf bildirimleri
+==============================================================
+
+Dafium Arşiv's own code is MIT licensed (see LICENSE). It ships with the
+following third-party engines, each under its own license. Full license
+texts are in the "lisanslar" folder.
+
+Dafium Arşiv'in kendi kodu MIT lisanslıdır. Aşağıdaki motorlar kendi
+lisanslarıyla birlikte gelir; tam metinler "lisanslar" klasöründedir.
+
+
+1) UnRAR library (unrar.dll) — version 7.3.2
+   Copyright (c) Alexander Roshal / RARLAB — https://www.rarlab.com
+   License: UnRAR license (freeware). lisanslar/unrar.txt
+   Used ONLY to extract RAR archives. The UnRAR source code may not be used
+   to develop a RAR (WinRAR) compatible archiver, and Dafium Arşiv does not
+   create RAR archives.
+   Sadece RAR açmak için kullanılır; RAR oluşturmaz.
+
+2) 7-Zip (7z.dll) — version 26.05
+   Copyright (C) 1999-2026 Igor Pavlov — https://www.7-zip.org
+   License: GNU LGPL 2.1 (+ BSD parts, + unRAR license restriction for RAR
+   decoder files). lisanslar/7-zip.txt, lisanslar/7-zip-LGPL-2.1.txt,
+   lisanslar/7-zip-unRAR-kisiti.txt
+   7z.dll is shipped as a separate, unmodified-API dynamic library built from
+   the official source (github.com/ip7z/7zip, tag 26.05). You may replace it
+   with your own build. Source: https://github.com/ip7z/7zip
+   Build steps: scripts/motorlari-derle.ps1
+
+3) libarchive (archive.dll) — version 3.8.9
+   Copyright (c) Tim Kientzle and libarchive contributors
+   https://www.libarchive.org — License: BSD 2-clause. lisanslar/libarchive.txt
+
+   archive.dll statically includes:
+   - zlib       — zlib License            — lisanslar/zlib.txt
+   - bzip2      — bzip2 License (BSD-like) — lisanslar/bzip2.txt
+   - xz/liblzma — 0BSD / public domain     — lisanslar/xz.txt
+   - zstd       — BSD 3-clause             — lisanslar/zstd.txt
+   - lz4        — BSD 2-clause             — lisanslar/lz4.txt
+
+4) Microsoft .NET runtime (self-contained build) — MIT License
+   https://github.com/dotnet/runtime
+
+The "Dafium" name and the "Dafi" mascot are trademarks of the Dafium project
+and are not covered by the MIT license.

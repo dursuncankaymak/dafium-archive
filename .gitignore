@@ -1,0 +1,7 @@
+bin/
+obj/
+cikti/
+yayin/
+*.user
+.vs/
+*.dafium-yarim

@@ -1,0 +1,39 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>WinExe</OutputType>
+    <TargetFramework>net10.0-windows</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <UseWPF>true</UseWPF>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <RootNamespace>DafiumArsiv</RootNamespace>
+    <AssemblyName>DafiumArsiv</AssemblyName>
+    <ApplicationIcon>uygulama.ico</ApplicationIcon>
+    <ApplicationManifest>app.manifest</ApplicationManifest>
+    <AssemblyTitle>Dafium ArÅŸiv</AssemblyTitle>
+    <Product>Dafium ArÅŸiv</Product>
+    <AssemblyDescription>RAR, ZIP, 7z ve diÄŸer arÅŸivleri aÃ§an hÄ±zlÄ± arÅŸiv yÃ¶neticisi</AssemblyDescription>
+    <Company>Dafium</Company>
+    <Copyright>Â© 2026 Dafium</Copyright>
+    <Version>1.0.0</Version>
+    <!-- WPF'in kendi yerel DLL'leri exe'ye gomulur; bizim motorlar (native\*.dll) ExcludeFromSingleFile ile yaninda kalir: 7z.dll LGPL, kullanici degistirebilmeli -->
+    <IncludeNativeLibrariesForSelfExtract>true</IncludeNativeLibrariesForSelfExtract>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Resource Include="uygulama.ico" />
+    <Resource Include="gorseller\dafi.png" />
+    <!-- vcpkg ile derlenen motorlar; bkz. README "Derleme" -->
+    <None Include="native\*.dll" CopyToOutputDirectory="PreserveNewest" Link="%(Filename)%(Extension)" ExcludeFromSingleFile="true" />
+    <None Include="LICENSE;THIRD-PARTY-NOTICES.txt" CopyToOutputDirectory="PreserveNewest" ExcludeFromSingleFile="true" />
+    <None Include="lisanslar\*.txt" CopyToOutputDirectory="PreserveNewest" ExcludeFromSingleFile="true" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Compile Remove="cikti/**;testler/**" />
+    <None Remove="cikti/**;testler/**" />
+    <Page Remove="cikti/**;testler/**" />
+  </ItemGroup>
+
+</Project>
