@@ -17,14 +17,12 @@
     <Company>Dafium</Company>
     <Copyright>Â© 2026 Dafium</Copyright>
     <Version>1.0.0</Version>
-    <!-- WPF'in kendi yerel DLL'leri exe'ye gomulur; bizim motorlar (native\*.dll) ExcludeFromSingleFile ile yaninda kalir: 7z.dll LGPL, kullanici degistirebilmeli -->
     <IncludeNativeLibrariesForSelfExtract>true</IncludeNativeLibrariesForSelfExtract>
   </PropertyGroup>
 
   <ItemGroup>
     <Resource Include="uygulama.ico" />
     <Resource Include="gorseller\dafi.png" />
-    <!-- vcpkg ile derlenen motorlar; bkz. README "Derleme" -->
     <None Include="native\*.dll" CopyToOutputDirectory="PreserveNewest" Link="%(Filename)%(Extension)" ExcludeFromSingleFile="true" />
     <None Include="LICENSE;THIRD-PARTY-NOTICES.txt" CopyToOutputDirectory="PreserveNewest" ExcludeFromSingleFile="true" />
     <None Include="lisanslar\*.txt" CopyToOutputDirectory="PreserveNewest" ExcludeFromSingleFile="true" />

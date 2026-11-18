@@ -1,7 +1,7 @@
 <Window x:Class="DafiumArsiv.YeniArsivPenceresi"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-        Title="Yeni arşiv" Width="560" SizeToContent="Height" ResizeMode="NoResize"
+        Title="{DynamicResource s.na_title}" Width="560" SizeToContent="Height" ResizeMode="NoResize"
         WindowStartupLocation="CenterOwner" ShowInTaskbar="False"
         WindowStyle="None" AllowsTransparency="True" Background="Transparent" AllowDrop="True"
         FontFamily="{StaticResource Yazitipi}" FontSize="13.5" Foreground="{StaticResource Yazi}">
@@ -13,12 +13,11 @@
           <TextBlock Text="&#xE7B8;" FontFamily="{StaticResource Simge}" FontSize="18" Foreground="White" HorizontalAlignment="Center" VerticalAlignment="Center" />
         </Border>
         <StackPanel Margin="14,0,0,0" VerticalAlignment="Center">
-          <TextBlock Text="Yeni arşiv" FontSize="18" FontWeight="Bold" Foreground="{StaticResource Parlak}" />
+          <TextBlock Text="{DynamicResource s.na_title}" FontSize="18" FontWeight="Bold" Foreground="{StaticResource Parlak}" />
           <TextBlock x:Name="Ozet" Foreground="{StaticResource Soluk}" Margin="0,2,0,0" />
         </StackPanel>
       </StackPanel>
 
-      <!-- eklenecekler -->
       <Border Margin="0,18,0,0" CornerRadius="12" Background="#0E0C1C" BorderBrush="{StaticResource Cizgi}" BorderThickness="1" MaxHeight="150">
         <Grid>
           <ScrollViewer VerticalScrollBarVisibility="Auto" Padding="6">
@@ -30,63 +29,59 @@
                       <TextBlock Text="{Binding Simge}" FontFamily="{StaticResource Simge}" Foreground="{Binding Renk}" VerticalAlignment="Center" />
                       <TextBlock Text="{Binding Ad}" Margin="10,0,0,0" VerticalAlignment="Center" TextTrimming="CharacterEllipsis" MaxWidth="380" />
                     </StackPanel>
-                    <Button HorizontalAlignment="Right" Content="&#xE711;" Tag="{Binding}" Click="Cikar_Click" Style="{StaticResource SimgeDugme}" Width="26" Height="26" FontSize="10" BorderThickness="0" Background="Transparent" ToolTip="Listeden çıkar" />
+                    <Button HorizontalAlignment="Right" Content="&#xE711;" Tag="{Binding}" Click="Cikar_Click" Style="{StaticResource SimgeDugme}" Width="26" Height="26" FontSize="10" BorderThickness="0" Background="Transparent" ToolTip="{DynamicResource s.na_remove}" />
                   </Grid>
                 </DataTemplate>
               </ItemsControl.ItemTemplate>
             </ItemsControl>
           </ScrollViewer>
-          <TextBlock x:Name="BosYazi" Text="Dosya ya da klasörleri buraya sürükle" Foreground="{StaticResource Soluk}" HorizontalAlignment="Center" VerticalAlignment="Center" Margin="0,18" />
+          <TextBlock x:Name="BosYazi" Text="{DynamicResource s.na_drop}" Foreground="{StaticResource Soluk}" HorizontalAlignment="Center" VerticalAlignment="Center" Margin="0,18" />
         </Grid>
       </Border>
       <StackPanel Orientation="Horizontal" Margin="0,8,0,0">
-        <Button Style="{StaticResource Dugme}" Height="32" Click="DosyaEkle_Click" Content="+ Dosya" />
-        <Button Style="{StaticResource Dugme}" Height="32" Margin="8,0,0,0" Click="KlasorEkle_Click" Content="+ Klasör" />
+        <Button Style="{StaticResource Dugme}" Height="32" Click="DosyaEkle_Click" Content="{DynamicResource s.na_add_file}" />
+        <Button Style="{StaticResource Dugme}" Height="32" Margin="8,0,0,0" Click="KlasorEkle_Click" Content="{DynamicResource s.na_add_folder}" />
       </StackPanel>
 
-      <!-- ad ve konum -->
-      <TextBlock Text="Arşiv adı" Foreground="{StaticResource Soluk}" FontSize="12.5" Margin="0,18,0,6" />
+      <TextBlock Text="{DynamicResource s.na_name}" Foreground="{StaticResource Soluk}" FontSize="12.5" Margin="0,18,0,6" />
       <Grid>
         <TextBox x:Name="AdKutu" Style="{StaticResource Kutu}" Margin="0,0,90,0" />
         <TextBlock x:Name="UzantiYazi" Text=".zip" HorizontalAlignment="Right" Width="80" VerticalAlignment="Center" Foreground="{StaticResource Vurgu2}" FontWeight="SemiBold" />
       </Grid>
-      <TextBlock Text="Nereye" Foreground="{StaticResource Soluk}" FontSize="12.5" Margin="0,12,0,6" />
+      <TextBlock Text="{DynamicResource s.na_where}" Foreground="{StaticResource Soluk}" FontSize="12.5" Margin="0,12,0,6" />
       <Grid>
         <TextBox x:Name="KonumKutu" Style="{StaticResource Kutu}" IsReadOnly="True" Margin="0,0,90,0" />
-        <Button HorizontalAlignment="Right" Width="80" Style="{StaticResource Dugme}" Content="Değiştir" Click="Konum_Click" />
+        <Button HorizontalAlignment="Right" Width="80" Style="{StaticResource Dugme}" Content="{DynamicResource s.na_change}" Click="Konum_Click" />
       </Grid>
 
-      <!-- biçim -->
-      <TextBlock Text="Biçim" Foreground="{StaticResource Soluk}" FontSize="12.5" Margin="0,16,0,6" />
+      <TextBlock Text="{DynamicResource s.na_format}" Foreground="{StaticResource Soluk}" FontSize="12.5" Margin="0,16,0,6" />
       <UniformGrid Columns="3">
         <RadioButton x:Name="ZipSec" GroupName="b" Style="{StaticResource SecenekKart}" Margin="0,0,6,0" IsChecked="True" Checked="Bicim_Checked">
-          <StackPanel><TextBlock Text="ZIP" FontWeight="Bold" Foreground="{StaticResource Parlak}" /><TextBlock Text="Her yerde açılır, şifre konabilir" Foreground="{StaticResource Soluk}" FontSize="11.5" TextWrapping="Wrap" /></StackPanel>
+          <StackPanel><TextBlock Text="ZIP" FontWeight="Bold" Foreground="{StaticResource Parlak}" /><TextBlock Text="{DynamicResource s.na_zip}" Foreground="{StaticResource Soluk}" FontSize="11.5" TextWrapping="Wrap" /></StackPanel>
         </RadioButton>
         <RadioButton x:Name="YediSec" GroupName="b" Style="{StaticResource SecenekKart}" Margin="3,0,3,0" Checked="Bicim_Checked">
-          <StackPanel><TextBlock Text="7z" FontWeight="Bold" Foreground="{StaticResource Parlak}" /><TextBlock Text="En küçük boyut" Foreground="{StaticResource Soluk}" FontSize="11.5" TextWrapping="Wrap" /></StackPanel>
+          <StackPanel><TextBlock Text="7z" FontWeight="Bold" Foreground="{StaticResource Parlak}" /><TextBlock Text="{DynamicResource s.na_7z}" Foreground="{StaticResource Soluk}" FontSize="11.5" TextWrapping="Wrap" /></StackPanel>
         </RadioButton>
         <RadioButton x:Name="ZstSec" GroupName="b" Style="{StaticResource SecenekKart}" Margin="6,0,0,0" Checked="Bicim_Checked">
-          <StackPanel><TextBlock Text="tar.zst" FontWeight="Bold" Foreground="{StaticResource Parlak}" /><TextBlock Text="En hızlı, yedekler için" Foreground="{StaticResource Soluk}" FontSize="11.5" TextWrapping="Wrap" /></StackPanel>
+          <StackPanel><TextBlock Text="tar.zst" FontWeight="Bold" Foreground="{StaticResource Parlak}" /><TextBlock Text="{DynamicResource s.na_zst}" Foreground="{StaticResource Soluk}" FontSize="11.5" TextWrapping="Wrap" /></StackPanel>
         </RadioButton>
       </UniformGrid>
 
-      <!-- seviye -->
-      <TextBlock Text="Sıkıştırma" Foreground="{StaticResource Soluk}" FontSize="12.5" Margin="0,14,0,6" />
+      <TextBlock Text="{DynamicResource s.na_level}" Foreground="{StaticResource Soluk}" FontSize="12.5" Margin="0,14,0,6" />
       <UniformGrid Columns="3">
-        <RadioButton x:Name="HizliSec" GroupName="s" Style="{StaticResource SecenekKart}" Margin="0,0,6,0" Content="Hızlı" HorizontalContentAlignment="Center" />
-        <RadioButton x:Name="NormalSec" GroupName="s" Style="{StaticResource SecenekKart}" Margin="3,0,3,0" Content="Normal" IsChecked="True" />
-        <RadioButton x:Name="EnIyiSec" GroupName="s" Style="{StaticResource SecenekKart}" Margin="6,0,0,0" Content="En iyi" />
+        <RadioButton x:Name="HizliSec" GroupName="s" Style="{StaticResource SecenekKart}" Margin="0,0,6,0" Content="{DynamicResource s.na_fast}" HorizontalContentAlignment="Center" />
+        <RadioButton x:Name="NormalSec" GroupName="s" Style="{StaticResource SecenekKart}" Margin="3,0,3,0" Content="{DynamicResource s.na_normal}" IsChecked="True" />
+        <RadioButton x:Name="EnIyiSec" GroupName="s" Style="{StaticResource SecenekKart}" Margin="6,0,0,0" Content="{DynamicResource s.na_best}" />
       </UniformGrid>
 
-      <!-- şifre -->
-      <TextBlock x:Name="SifreBaslik" Text="Şifre (isteğe bağlı, AES-256)" Foreground="{StaticResource Soluk}" FontSize="12.5" Margin="0,14,0,6" />
+      <TextBlock x:Name="SifreBaslik" Text="{DynamicResource s.na_pw}" Foreground="{StaticResource Soluk}" FontSize="12.5" Margin="0,14,0,6" />
       <Border x:Name="SifreCerceve" Height="40" CornerRadius="11" Background="#0E0C1C" BorderBrush="{StaticResource Cizgi}" BorderThickness="1">
         <PasswordBox x:Name="SifreKutu" Background="Transparent" BorderThickness="0" Foreground="{StaticResource Parlak}" CaretBrush="{StaticResource Vurgu2}" VerticalAlignment="Center" Margin="10,0" FontSize="14" />
       </Border>
 
       <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,22,0,0">
-        <Button Style="{StaticResource Dugme}" Content="Vazgeç" IsCancel="True" MinWidth="90" Click="Vazgec_Click" />
-        <Button x:Name="OlusturDugme" Style="{StaticResource AnaDugme}" Content="Oluştur" IsDefault="True" MinWidth="110" Margin="8,0,0,0" Click="Olustur_Click" />
+        <Button Style="{StaticResource Dugme}" Content="{DynamicResource s.back}" IsCancel="True" MinWidth="90" Click="Vazgec_Click" />
+        <Button x:Name="OlusturDugme" Style="{StaticResource AnaDugme}" Content="{DynamicResource s.create}" IsDefault="True" MinWidth="110" Margin="8,0,0,0" Click="Olustur_Click" />
       </StackPanel>
     </StackPanel>
   </Border>

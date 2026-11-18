@@ -3,13 +3,11 @@ using System.Runtime.InteropServices;
 
 namespace DafiumArsiv.Motor;
 
-/// <summary>ZIP, 7z, TAR, GZ, XZ, ZST, BZ2, ISO, CAB … için libarchive (archive.dll).</summary>
 public sealed unsafe class LibarchiveArsiv : Arsiv
 {
     public LibarchiveArsiv(string yol) : base(yol) { }
     public override string MotorAdi => "libarchive";
 
-    // Tek dosyalık sıkıştırmalar (dosya.txt.gz) "raw" biçimiyle okunur; ilk denemede anlaşılır.
     bool _ham;
 
     const int OK = 0, EOF = 1, WARN = -20, FAILED = -25, FATAL = -30;
@@ -27,8 +25,7 @@ public sealed unsafe class LibarchiveArsiv : Arsiv
         N.archive_read_support_filter_all(o.A);
         if (_ham) N.archive_read_support_format_raw(o.A);
         else N.archive_read_support_format_all(o.A);
-        // Günümüz tar arşivlerinde adlar UTF-8; yoksa Windows'ta Türkçe harfler bozuk çıkıyor.
-        // (ZIP'e dokunulmaz: libarchive UTF-8 bayrağı olmayan ZIP'lerde zaten OEM kod sayfasını kullanıyor.)
+        // non-ascii names in tar come out mangled on windows without this
         N.archive_read_set_options(o.A, "tar:hdrcharset=UTF-8");
         if (!string.IsNullOrEmpty(Sifre)) N.archive_read_add_passphrase(o.A, Sifre);
         if (N.archive_read_open_filename_w(o.A, Yol, 1 << 20) != OK)
@@ -43,16 +40,16 @@ public sealed unsafe class LibarchiveArsiv : Arsiv
     static string Hata(IntPtr a)
     {
         var p = N.archive_error_string(a);
-        return p == IntPtr.Zero ? "Arşiv okunamadı." : Marshal.PtrToStringUTF8(p) ?? "Arşiv okunamadı.";
+        return p == IntPtr.Zero ? Dil.T("e_read") : Marshal.PtrToStringUTF8(p) ?? Dil.T("e_read");
     }
 
     static bool SifreHatasi(string h) => !Desteksiz(h) && (h.Contains("assphrase", StringComparison.OrdinalIgnoreCase) || h.Contains("encrypt", StringComparison.OrdinalIgnoreCase) || h.Contains("decrypt", StringComparison.OrdinalIgnoreCase));
 
-    /// <summary>libarchive bazı şifreleme türlerini (ör. şifreli 7z) hiç açamıyor; şifre sormak sonsuz döngü olur.</summary>
+    // libarchive can't decrypt some formats at all, don't loop on the password prompt
     static bool Desteksiz(string h) => h.Contains("not supported", StringComparison.OrdinalIgnoreCase) || h.Contains("unsupported", StringComparison.OrdinalIgnoreCase);
 
     static string Turkcele(string h) => Desteksiz(h) && h.Contains("encrypt", StringComparison.OrdinalIgnoreCase)
-        ? "Bu arşivin şifreleme türü henüz desteklenmiyor (şifreli 7z)."
+        ? Dil.T("e_enc_unsupported")
         : h;
 
     string KayitYolu(IntPtr e)
@@ -65,7 +62,7 @@ public sealed unsafe class LibarchiveArsiv : Arsiv
             s = u != IntPtr.Zero ? Marshal.PtrToStringUTF8(u) : null;
         }
         if (_ham || string.IsNullOrEmpty(s) || s == "data")
-            s = Path.GetFileNameWithoutExtension(Yol); // "notlar.txt.gz" -> "notlar.txt"
+            s = Path.GetFileNameWithoutExtension(Yol);
         return s!.Replace('\\', '/').TrimEnd('/');
     }
 
@@ -74,7 +71,7 @@ public sealed unsafe class LibarchiveArsiv : Arsiv
         try { return ListeleIc(iptal); }
         catch (ArsivHatasi h) when (!_ham && h.Message.Contains("Unrecognized archive format", StringComparison.OrdinalIgnoreCase))
         {
-            _ham = true; // .gz/.xz/.zst/.bz2 tek dosya
+            _ham = true;
             return ListeleIc(iptal);
         }
     }
@@ -107,7 +104,6 @@ public sealed unsafe class LibarchiveArsiv : Arsiv
                 Sifreli = N.archive_entry_is_encrypted(e) != 0,
                 Sira = sira++,
             });
-            // Başlıkları okumak için veriyi açmaya gerek yok; ama bazı biçimlerde atlama da okuma demek.
             N.archive_read_data_skip(o.A);
         }
         return liste;

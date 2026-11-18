@@ -11,8 +11,8 @@ public partial class SifrePenceresi : Window
         InitializeComponent();
         if (yanlis)
         {
-            Baslik.Text = "Şifre yanlış";
-            Alt.Text = "Tekrar dene. Büyük/küçük harfe dikkat.";
+            Baslik.Text = Dil.T("pw_wrong");
+            Alt.Text = Dil.T("pw_retry");
         }
         Loaded += (_, _) => Kutu.Focus();
         MouseLeftButtonDown += (_, _) => { try { DragMove(); } catch { } };

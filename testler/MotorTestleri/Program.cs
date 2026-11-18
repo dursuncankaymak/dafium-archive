@@ -2,7 +2,7 @@ using System.Diagnostics;
 using System.Security.Cryptography;
 using DafiumArsiv.Motor;
 
-var kok = args[0]; // arsiv-test klasörü
+var kok = args[0];
 var arsivler = Path.Combine(kok, "arsivler");
 var beklenen = File.ReadAllLines(Path.Combine(kok, "kaynak.sha"))
     .Select(l => (hash: l[..64], yol: l[66..].TrimStart('.', '/')))
@@ -22,11 +22,9 @@ void TamTest(string dosya, string? sifre, bool listeSifreIster, bool cikarSifreI
     try
     {
         using var a = Arsiv.Ac(yol);
-        // 1) şifresiz listele
         List<Kayit> liste;
         try { liste = a.Listele(); if (listeSifreIster) { Sonuc(dosya + " listele-şifre-ister", false, "şifre istemedi"); } }
         catch (SifreGerekliException s) { Sonuc(dosya + " listele-şifre-ister", listeSifreIster && !s.Yanlis); a.Sifre = sifre; liste = a.Listele(); }
-        // yanlış şifre denemesi
         if (sifre != null)
         {
             using var y = Arsiv.Ac(yol);
@@ -43,7 +41,6 @@ void TamTest(string dosya, string? sifre, bool listeSifreIster, bool cikarSifreI
         }
         int dosyaSay = liste.Count(k => !k.Klasor);
         Sonuc(dosya + " liste", dosyaSay == beklenen.Count, $"{dosyaSay} dosya, motor {a.MotorAdi}");
-        // 2) çıkar (şifre gerekiyorsa önce şifresiz dene)
         var sw = Stopwatch.StartNew();
         if (cikarSifreIster && a.Sifre == null)
         {
@@ -56,11 +53,9 @@ void TamTest(string dosya, string? sifre, bool listeSifreIster, bool cikarSifreI
         bool ayni = h.Count == beklenen.Count && beklenen.All(b => h.TryGetValue(b.Key, out var x) && x == b.Value);
         Sonuc(dosya + " çıkar+hash", ayni, $"{sw.ElapsedMilliseconds} ms, {bildirim} bildirim, {son} bayt");
         if (!ayni) Console.WriteLine("   bulunan: " + string.Join(", ", h.Keys));
-        // 3) önizleme oku
         var t = liste.First(k => k.Yol.EndsWith("tekrar.txt"));
         var veri = a.Oku(t, 10 << 20);
         Sonuc(dosya + " oku", veri != null && Convert.ToHexStringLower(SHA256.HashData(veri)) == beklenen["alt klasör/derin/tekrar.txt"]);
-        // 4) seçili çıkar
         var sec = liste.Where(k => k.Yol.EndsWith("dafi.png")).ToList();
         var hedef2 = hedef + "-secili";
         a.Cikar(sec, hedef2, null, default);
@@ -75,7 +70,7 @@ TamTest("solid.rar", null, false, false);
 TamTest("basliksifreli.rar", "Gizli123", true, true);
 TamTest("verisifreli.rar", "Veri456", false, true);
 TamTest("parcali.part1.rar", null, false, false);
-TamTest("parcali.part3.rar", null, false, false); // ortadaki parçadan açınca part1'e dönmeli
+TamTest("parcali.part3.rar", null, false, false);
 TamTest("normal.zip", null, false, false);
 TamTest("aes.zip", "Zip789", false, true);
 TamTest("normal.7z", null, false, false);
@@ -83,7 +78,6 @@ TamTest("sifreli.7z", "Yedi000", true, true);
 TamTest("verisifreli.7z", "Yedi111", false, true);
 TamTest("paket.tar.gz", null, false, false);
 
-// tek dosyalık sıkıştırmalar
 foreach (var tek in new[] { "tek.txt.gz", "tek2.txt.xz" })
 {
     try
@@ -98,7 +92,6 @@ foreach (var tek in new[] { "tek.txt.gz", "tek2.txt.xz" })
     catch (Exception ex) { Sonuc(tek, false, ex.Message); }
 }
 
-// zip slip
 try
 {
     using var a = Arsiv.Ac(Path.Combine(arsivler, "kacak.zip"));
@@ -110,16 +103,13 @@ try
 }
 catch (Exception ex) { Sonuc("zip-slip", false, ex.Message); }
 
-// gerçek dosya (salt okunur listeleme)
 try
 {
-    // İsteğe bağlı: kendi gerçek RAR dosyanla dene (sadece listeler)
     var gercek = Environment.GetEnvironmentVariable("DAFIUM_GERCEK_RAR") ?? "";
     if (File.Exists(gercek)) { using var a = Arsiv.Ac(gercek); var l = a.Listele(); Sonuc("gerçek rar listele", l.Count > 0, $"{l.Count} kayıt"); }
 }
 catch (Exception ex) { Sonuc("gerçek rar listele", false, ex.Message); }
 
-// iptal
 try
 {
     using var a = Arsiv.Ac(Path.Combine(arsivler, "solid.rar"));

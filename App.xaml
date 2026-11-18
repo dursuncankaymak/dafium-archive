@@ -3,7 +3,6 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              ShutdownMode="OnMainWindowClose">
   <Application.Resources>
-    <!-- Dafium "Gece Moru" paleti -->
     <Color x:Key="ZeminR">#0E0C1C</Color>
     <SolidColorBrush x:Key="Zemin" Color="#0E0C1C" />
     <SolidColorBrush x:Key="Panel" Color="#15122A" />
@@ -26,7 +25,6 @@
     <FontFamily x:Key="Yazitipi">Segoe UI Variable Text, Segoe UI</FontFamily>
     <FontFamily x:Key="Simge">Segoe Fluent Icons, Segoe MDL2 Assets</FontFamily>
 
-    <!-- Ana düğme -->
     <Style x:Key="AnaDugme" TargetType="Button">
       <Setter Property="Foreground" Value="White" />
       <Setter Property="Background" Value="{StaticResource VurguGecis}" />
@@ -53,7 +51,6 @@
       </Setter>
     </Style>
 
-    <!-- İkincil düğme -->
     <Style x:Key="Dugme" TargetType="Button">
       <Setter Property="Foreground" Value="{StaticResource Yazi}" />
       <Setter Property="Background" Value="#1FFFFFFF" />
@@ -86,7 +83,6 @@
       <Setter Property="FontSize" Value="15" />
     </Style>
 
-    <!-- Seçenek kartı (biçim/seviye seçimi) -->
     <Style x:Key="SecenekKart" TargetType="RadioButton">
       <Setter Property="Foreground" Value="{StaticResource Yazi}" />
       <Setter Property="Cursor" Value="Hand" />
@@ -127,7 +123,6 @@
       </Setter>
     </Style>
 
-    <!-- Üç nokta menüsü -->
     <Style TargetType="ContextMenu">
       <Setter Property="Background" Value="{StaticResource Kart}" />
       <Setter Property="Foreground" Value="{StaticResource Yazi}" />
@@ -162,7 +157,6 @@
       </Setter>
     </Style>
 
-    <!-- Pencere düğmeleri (özel başlık çubuğu) -->
     <Style x:Key="PencereDugme" TargetType="Button">
       <Setter Property="Foreground" Value="{StaticResource Yazi}" />
       <Setter Property="FontFamily" Value="{StaticResource Simge}" />
@@ -193,7 +187,6 @@
       </Setter>
     </Style>
 
-    <!-- Liste satırları -->
     <Style x:Key="Satir" TargetType="ListViewItem">
       <Setter Property="Foreground" Value="{StaticResource Yazi}" />
       <Setter Property="Height" Value="38" />
@@ -230,7 +223,6 @@
       </Setter>
     </Style>
 
-    <!-- İnce kaydırma çubuğu -->
     <Style TargetType="ScrollBar">
       <Setter Property="Width" Value="8" />
       <Setter Property="MinWidth" Value="8" />

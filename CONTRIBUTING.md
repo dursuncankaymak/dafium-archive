@@ -1,30 +1,44 @@
-# Katkı rehberi / Contributing
+# Contributing
 
-Teşekkürler! Her türlü katkı değerli: kod incelemesi, hata bildirimi, çeviri, test arşivi, fikir.
-Thanks! Reviews, bug reports, translations and PRs are all welcome — English is fine too.
+Thanks! Every kind of help counts: code review, bug reports, translations, test archives, ideas.
+Issues and PRs in English or Turkish are both fine.
 
-## Hata bildirirken / Reporting bugs
+## Reporting bugs
 
-- Windows sürümü ve Dafium Arşiv sürümü (menü → Lisanslar ve hakkında)
-- Arşivin biçimi (RAR5, ZIP, 7z…), şifreli mi, çok parçalı mı
-- Mümkünse sorunu gösteren küçük bir örnek arşiv (kişisel dosya **göndermeyin**)
-- Hata kaydı: `%APPDATA%\DafiumArsiv\hata.log`
+- Windows version and Dafium Archive version (⋮ menu → Licenses and about)
+- Archive format (RAR5, ZIP, 7z…), whether it's encrypted or multi-part
+- If you can, a small sample archive that shows the problem (please **don't** send personal files)
+- Error log: `%APPDATA%\DafiumArsiv\hata.log`
 
-Güvenlik açığı bulduysanız (ör. hedef klasör dışına yazdıran bir arşiv) lütfen herkese açık issue yerine
-GitHub'daki **Security → Report a vulnerability** ile bildirin.
+Found a security issue (e.g. an archive that writes outside the target folder)? Please report it through
+GitHub's **Security → Report a vulnerability** instead of a public issue.
 
-## Kod
+## Code
 
-- Proje yapısı:
-  - `Motor/` — arşiv motorları (UnRAR, 7-Zip, libarchive) ve ortak `Arsiv` sınıfı
-  - `MainWindow.*`, `YeniArsivPenceresi.*`, `SifrePenceresi.*` — arayüz (WPF)
-  - `Kabuk.cs` — Gezgin sağ tık menüsü (HKCU)
-  - `native/` — derlenmiş motorlar, `scripts/motorlari-derle.ps1` ile yeniden üretilir
-- Kod içindeki adlar ve yorumlar Türkçe. Yeni kodda da Türkçe tercih edilir ama İngilizce PR da kabul.
-- PR göndermeden önce motor testlerini çalıştırın (README → Derleme).
-- Bir motora dokunduysanız şifreli, çok parçalı ve "zip slip" testlerinin hâlâ geçtiğinden emin olun.
+- Layout:
+  - `Motor/` archive engines (UnRAR, 7-Zip, libarchive) and the shared `Arsiv` base class
+  - `MainWindow.*`, `YeniArsivPenceresi.*`, `SifrePenceresi.*` the UI (WPF)
+  - `Dil.cs` all UI strings, English and Turkish
+  - `Kabuk.cs` Explorer context menu (HKCU)
+  - `native/` prebuilt engines, rebuilt with `scripts/motorlari-derle.ps1`
+- Identifiers are in Turkish. New code can follow that or use English, either is fine.
+- Run the engine tests before sending a PR (README → Building).
+- If you touch an engine, make sure the encrypted, multi-part and zip slip tests still pass.
 
-## Yapay zeka
+## Translations
 
-Bu projenin bir kısmı yapay zeka (Claude) yardımıyla yazıldı ve testlerle doğrulandı. Yapay zekayla
-hazırladığınız PR'ları da kabul ediyoruz; lütfen PR açıklamasında belirtin ve kendiniz test edin.
+Add your language as a new column in `Dil.cs` and a way to pick it in the ⋮ menu. Keep strings short, the buttons aren't very wide.
+
+## AI
+
+Parts of this project were written with help from AI (Claude) and verified with tests. AI-assisted PRs
+are welcome too; just mention it in the PR description and test it yourself.
+
+---
+
+## Türkçe
+
+Her türlü katkı değerli: inceleme, hata bildirimi, çeviri, test arşivi, fikir. Hata bildirirken Windows ve
+uygulama sürümünü, arşivin biçimini ve mümkünse küçük bir örnek arşivi ekleyin (kişisel dosya göndermeyin).
+Hata kaydı `%APPDATA%\DafiumArsiv\hata.log` içinde. Güvenlik açıklarını herkese açık issue yerine
+**Security → Report a vulnerability** ile bildirin. PR göndermeden önce motor testlerini çalıştırın.

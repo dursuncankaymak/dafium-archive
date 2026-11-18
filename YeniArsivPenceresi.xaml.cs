@@ -53,14 +53,14 @@ public partial class YeniArsivPenceresi : Window
     void Guncelle()
     {
         BosYazi.Visibility = _kaynaklar.Count == 0 ? Visibility.Visible : Visibility.Collapsed;
-        Ozet.Text = _kaynaklar.Count == 0 ? "Eklenecekleri seç" : $"{_kaynaklar.Count} öğe eklenecek";
+        Ozet.Text = _kaynaklar.Count == 0 ? Dil.T("na_pick") : Dil.T("na_count", _kaynaklar.Count);
         if (!_adElle)
         {
             AdKutu.Text = _kaynaklar.Count switch
             {
-                0 => "Arşiv",
+                0 => Dil.T("na_default"),
                 1 => Directory.Exists(_kaynaklar[0].Yol) ? _kaynaklar[0].Ad : Path.GetFileNameWithoutExtension(_kaynaklar[0].Ad),
-                _ => Path.GetFileName(KonumKutu.Text.TrimEnd('\\')) is { Length: > 0 } k ? k : "Arşiv",
+                _ => Path.GetFileName(KonumKutu.Text.TrimEnd('\\')) is { Length: > 0 } k ? k : Dil.T("na_default"),
             };
         }
         OlusturDugme.IsEnabled = _kaynaklar.Count > 0;
@@ -68,13 +68,13 @@ public partial class YeniArsivPenceresi : Window
 
     void Bicim_Checked(object sender, RoutedEventArgs e)
     {
-        // XAML yüklenirken (IsChecked="True") alt kısımdaki denetimler henüz oluşmamış olabilir
+        // fires during InitializeComponent before these exist
         if (UzantiYazi == null || SifreCerceve == null || SifreBaslik == null) return;
         UzantiYazi.Text = ArsivOlusturucu.Uzanti(SecilenBicim);
         bool zip = SecilenBicim == ArsivBicimi.Zip;
         SifreCerceve.IsEnabled = zip;
         SifreCerceve.Opacity = zip ? 1 : 0.4;
-        SifreBaslik.Text = zip ? "Şifre (isteğe bağlı, AES-256)" : "Şifre sadece ZIP'te";
+        SifreBaslik.Text = Dil.T(zip ? "na_pw" : "na_pw_zip");
     }
 
     void Cikar_Click(object sender, RoutedEventArgs e)
@@ -84,19 +84,19 @@ public partial class YeniArsivPenceresi : Window
 
     void DosyaEkle_Click(object sender, RoutedEventArgs e)
     {
-        var d = new OpenFileDialog { Multiselect = true, Title = "Eklenecek dosyalar" };
+        var d = new OpenFileDialog { Multiselect = true, Title = Dil.T("na_files") };
         if (d.ShowDialog(this) == true) foreach (var f in d.FileNames) Ekle(f);
     }
 
     void KlasorEkle_Click(object sender, RoutedEventArgs e)
     {
-        var d = new OpenFolderDialog { Multiselect = true, Title = "Eklenecek klasörler" };
+        var d = new OpenFolderDialog { Multiselect = true, Title = Dil.T("na_folders") };
         if (d.ShowDialog(this) == true) foreach (var f in d.FolderNames) Ekle(f);
     }
 
     void Konum_Click(object sender, RoutedEventArgs e)
     {
-        var d = new OpenFolderDialog { Title = "Arşiv nereye kaydedilsin?", InitialDirectory = KonumKutu.Text };
+        var d = new OpenFolderDialog { Title = Dil.T("na_save_where"), InitialDirectory = KonumKutu.Text };
         if (d.ShowDialog(this) == true) KonumKutu.Text = d.FolderName;
     }
 
@@ -105,10 +105,10 @@ public partial class YeniArsivPenceresi : Window
         var ad = AdKutu.Text.Trim();
         if (ad.Length == 0 || ad.IndexOfAny(Path.GetInvalidFileNameChars()) >= 0)
         {
-            MessageBox.Show(this, "Arşiv adında kullanılamayan bir karakter var.", "Dafium Arşiv");
+            MessageBox.Show(this, Dil.T("na_bad_name"), Dil.T("app"));
             return;
         }
-        if (File.Exists(Hedef) && MessageBox.Show(this, $"{Path.GetFileName(Hedef)} zaten var. Üzerine yazılsın mı?", "Dafium Arşiv",
+        if (File.Exists(Hedef) && MessageBox.Show(this, Dil.T("na_exists", Path.GetFileName(Hedef)), Dil.T("app"),
                 MessageBoxButton.YesNo, MessageBoxImage.Question) != MessageBoxResult.Yes) return;
         DialogResult = true;
     }

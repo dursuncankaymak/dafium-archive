@@ -6,16 +6,13 @@ namespace DafiumArsiv.Motor;
 public enum ArsivBicimi { Zip, YediZ, TarZst }
 public enum Seviye { Hizli, Normal, EnIyi }
 
-/// <summary>libarchive ile ZIP (isteğe bağlı AES-256 şifre), 7z ve tar.zst oluşturur.</summary>
 public static unsafe class ArsivOlusturucu
 {
     public static string Uzanti(ArsivBicimi b) => b switch { ArsivBicimi.Zip => ".zip", ArsivBicimi.YediZ => ".7z", _ => ".tar.zst" };
 
-    /// <summary>kaynaklar: dosya ve klasör yolları. Klasörler adlarıyla birlikte (içleriyle) eklenir.</summary>
     public static void Olustur(IReadOnlyList<string> kaynaklar, string hedef, ArsivBicimi bicim, Seviye seviye, string? sifre,
         IProgress<Ilerleme>? ilerleme, CancellationToken iptal)
     {
-        // Eklenecek dosyaları ve arşivdeki adlarını önceden çıkar (toplam boyut için)
         var ogeler = new List<(string disk, string ad, bool klasor)>();
         foreach (var k in kaynaklar)
         {
@@ -30,8 +27,9 @@ public static unsafe class ArsivOlusturucu
             else if (File.Exists(tam)) ogeler.Add((tam, Path.GetFileName(tam), false));
         }
         var hedefTam = Path.GetFullPath(hedef);
-        ogeler.RemoveAll(o => string.Equals(o.disk, hedefTam, StringComparison.OrdinalIgnoreCase)); // kendini eklemesin
-        if (ogeler.Count == 0) throw new ArsivHatasi("Eklenecek dosya bulunamadı.");
+        // don't pack the archive into itself
+        ogeler.RemoveAll(o => string.Equals(o.disk, hedefTam, StringComparison.OrdinalIgnoreCase));
+        if (ogeler.Count == 0) throw new ArsivHatasi(Dil.T("e_nothing"));
 
         long toplam = ogeler.Where(o => !o.klasor).Sum(o => { try { return new FileInfo(o.disk).Length; } catch { return 0L; } });
         int dosyaSayisi = ogeler.Count(o => !o.klasor);
@@ -114,17 +112,17 @@ public static unsafe class ArsivOlusturucu
                     Secenek(a, "zip:encryption=aes256");
                     if (N.archive_write_set_passphrase(a, sifre) != 0) throw new ArsivHatasi(Hata(a));
                 }
-                // Türkçe adlar her programda doğru görünsün
+                // utf-8 flag so 7-zip / explorer show turkish names right
                 Secenek(a, "zip:hdrcharset=UTF-8");
                 break;
             case ArsivBicimi.YediZ:
-                if (!string.IsNullOrEmpty(sifre)) throw new ArsivHatasi("Şifreli arşiv için ZIP seç (7z şifreleme şimdilik yok).");
+                if (!string.IsNullOrEmpty(sifre)) throw new ArsivHatasi(Dil.T("e_pw_zip7"));
                 N.archive_write_set_format_7zip(a);
                 Secenek(a, "7zip:compression=lzma2");
                 Secenek(a, "7zip:compression-level=" + (seviye switch { Seviye.Hizli => 1, Seviye.Normal => 5, _ => 9 }));
                 break;
             default:
-                if (!string.IsNullOrEmpty(sifre)) throw new ArsivHatasi("Şifreli arşiv için ZIP seç.");
+                if (!string.IsNullOrEmpty(sifre)) throw new ArsivHatasi(Dil.T("e_pw_zip"));
                 N.archive_write_set_format_pax_restricted(a);
                 N.archive_write_add_filter_zstd(a);
                 Secenek(a, "zstd:compression-level=" + (seviye switch { Seviye.Hizli => 3, Seviye.Normal => 9, _ => 19 }));
@@ -142,7 +140,7 @@ public static unsafe class ArsivOlusturucu
     static string Hata(IntPtr a)
     {
         var p = N.archive_error_string(a);
-        return p == IntPtr.Zero ? "Arşiv yazılamadı." : Marshal.PtrToStringUTF8(p) ?? "Arşiv yazılamadı.";
+        return p == IntPtr.Zero ? Dil.T("e_write") : Marshal.PtrToStringUTF8(p) ?? Dil.T("e_write");
     }
 
     static class N

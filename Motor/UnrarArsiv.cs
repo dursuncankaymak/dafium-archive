@@ -4,8 +4,6 @@ using System.Runtime.InteropServices;
 
 namespace DafiumArsiv.Motor;
 
-/// <summary>RAR (1.5–7.x, RAR5 dahil) için RARLAB'ın ücretsiz UnRAR kütüphanesi (unrar.dll).
-/// Şifreli, çok parçalı ve solid arşivleri destekler. Sadece açar; RAR oluşturamaz.</summary>
 public sealed unsafe class UnrarArsiv : Arsiv
 {
     public UnrarArsiv(string yol) : base(yol) { }
@@ -18,7 +16,6 @@ public sealed unsafe class UnrarArsiv : Arsiv
     const uint RHDF_ENCRYPTED = 0x04, RHDF_DIRECTORY = 0x20;
     const uint UZUN_AD = 32768;
 
-    /// <summary>Geri çağrının (callback) durumu; GCHandle ile UnRAR'a UserData olarak verilir.</summary>
     sealed class Baglam
     {
         public string? Sifre;
@@ -55,14 +52,14 @@ public sealed unsafe class UnrarArsiv : Arsiv
                     hedef.Clear();
                     b.Sifre.AsSpan(0, Math.Min(b.Sifre.Length, hedef.Length - 1)).CopyTo(hedef);
                     return 1;
-                case 2: // UCM_NEEDPASSWORD (ANSI) — W sürümü kullanılıyor
+                case 2: // UCM_NEEDPASSWORD
                     return -1;
-                case 3: // UCM_CHANGEVOLUMEW: P2 = 0 (bulunamadı, sor) / 1 (bilgi)
+                case 3: // UCM_CHANGEVOLUMEW
                     if (p2 == 0) { b.EksikCilt = Marshal.PtrToStringUni(p1); return -1; }
                     return 1;
-                case 0: // UCM_CHANGEVOLUME (ANSI)
+                case 0: // UCM_CHANGEVOLUME
                     return p2 == 0 ? -1 : 1;
-                case 5: // UCM_LARGEDICT: büyük sözlüklü arşive izin ver
+                case 5: // UCM_LARGEDICT
                     return 1;
             }
         }
@@ -108,22 +105,22 @@ public sealed unsafe class UnrarArsiv : Arsiv
     Exception HataNesnesi(int kod, Baglam b, bool sifreliKayit)
     {
         if (kod == ERAR_MISSING_PASSWORD || (b.SifreIstendi && string.IsNullOrEmpty(b.Sifre)))
-            return new SifreGerekliException("Bu arşiv şifreli.", false);
+            return new SifreGerekliException(Dil.T("e_encrypted"), false);
         if (kod == ERAR_BAD_PASSWORD || (kod == ERAR_BAD_DATA && (sifreliKayit || b.SifreIstendi)))
-            return new SifreGerekliException("Şifre yanlış.", true);
+            return new SifreGerekliException(Dil.T("e_wrong_pw"), true);
         if (b.EksikCilt != null)
-            return new ArsivHatasi("Arşivin bir parçası eksik: " + Path.GetFileName(b.EksikCilt));
+            return new ArsivHatasi(Dil.T("e_missing_part", Path.GetFileName(b.EksikCilt)));
         return new ArsivHatasi(kod switch
         {
-            ERAR_BAD_DATA => "Arşiv bozuk (veri hatası).",
-            ERAR_BAD_ARCHIVE => "Bu dosya geçerli bir RAR arşivi değil.",
-            ERAR_UNKNOWN_FORMAT => "Bilinmeyen RAR biçimi.",
-            ERAR_EOPEN => "Arşiv açılamadı (başka bir program kullanıyor olabilir ya da bir parça eksik).",
-            ERAR_ECREATE => "Dosya oluşturulamadı. Hedef klasöre yazma izni var mı?",
-            ERAR_EREAD => "Arşiv okunurken hata oluştu.",
-            ERAR_EWRITE => "Diske yazılamadı. Disk dolu olabilir.",
-            ERAR_LARGE_DICT => "Arşiv çok büyük bellek istiyor.",
-            _ => "RAR hatası (kod " + kod + ").",
+            ERAR_BAD_DATA => Dil.T("e_bad_data"),
+            ERAR_BAD_ARCHIVE => Dil.T("e_not_rar"),
+            ERAR_UNKNOWN_FORMAT => Dil.T("e_unknown_rar"),
+            ERAR_EOPEN => Dil.T("e_eopen"),
+            ERAR_ECREATE => Dil.T("e_ecreate"),
+            ERAR_EREAD => Dil.T("e_eread"),
+            ERAR_EWRITE => Dil.T("e_ewrite"),
+            ERAR_LARGE_DICT => Dil.T("e_largedict"),
+            _ => Dil.T("e_rar", kod),
         });
     }
 
@@ -298,7 +295,7 @@ public sealed unsafe class UnrarArsiv : Arsiv
         finally { bas.Birak(); }
     }
 
-    [StructLayout(LayoutKind.Sequential, Pack = 1)] // dll.hpp: #pragma pack(push, 1)
+    [StructLayout(LayoutKind.Sequential, Pack = 1)] // dll.hpp is pack(1), dates/names read wrong otherwise
     struct OpenEx
     {
         public IntPtr ArcName;
@@ -316,7 +313,7 @@ public sealed unsafe class UnrarArsiv : Arsiv
         public fixed uint Reserved[20];
     }
 
-    [StructLayout(LayoutKind.Sequential, Pack = 1)] // dll.hpp: #pragma pack(push, 1)
+    [StructLayout(LayoutKind.Sequential, Pack = 1)] // dll.hpp is pack(1), dates/names read wrong otherwise
     struct HeaderEx
     {
         public fixed byte ArcName[1024];

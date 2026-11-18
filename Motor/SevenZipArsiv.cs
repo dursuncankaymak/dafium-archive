@@ -3,8 +3,6 @@ using System.Runtime.InteropServices;
 
 namespace DafiumArsiv.Motor;
 
-/// <summary>.7z için 7-Zip'in kendi motoru (7z.dll, LGPL). Şifreli başlık ve AES dahil her 7z'yi açar.
-/// 7z.dll ayrı dosya olarak exe'nin yanında durur (LGPL: kullanıcı değiştirebilsin).</summary>
 public sealed unsafe class SevenZipArsiv : Arsiv
 {
     public SevenZipArsiv(string yol) : base(yol) { }
@@ -32,7 +30,7 @@ public sealed unsafe class SevenZipArsiv : Arsiv
         Guid c = Clsid7z, i = IidInArchive;
         IntPtr p;
         int hr = _createObject(&c, &i, &p);
-        if (hr != S_OK || p == IntPtr.Zero) throw new ArsivHatasi("7-Zip motoru başlatılamadı.");
+        if (hr != S_OK || p == IntPtr.Zero) throw new ArsivHatasi(Dil.T("e_7z_init"));
         try { return (IInArchive)Marshal.GetObjectForIUnknown(p); }
         finally { Marshal.Release(p); }
     }
@@ -64,8 +62,8 @@ public sealed unsafe class SevenZipArsiv : Arsiv
             akis.Dispose();
             iptal.ThrowIfCancellationRequested();
             if (cagri.SifreIstendi)
-                throw new SifreGerekliException(string.IsNullOrEmpty(Sifre) ? "Bu arşiv şifreli." : "Şifre yanlış.", !string.IsNullOrEmpty(Sifre));
-            throw new ArsivHatasi(hr == S_FALSE ? "Bu dosya geçerli bir 7z arşivi değil ya da bozuk." : $"7z açılamadı (0x{hr:X8}).");
+                throw new SifreGerekliException(Dil.T(string.IsNullOrEmpty(Sifre) ? "e_encrypted" : "e_wrong_pw"), !string.IsNullOrEmpty(Sifre));
+            throw new ArsivHatasi(hr == S_FALSE ? Dil.T("e_not_7z") : Dil.T("e_7z_open", hr));
         }
         return new Acik { A = a, Akis = akis, Cagri = cagri };
     }
@@ -125,7 +123,7 @@ public sealed unsafe class SevenZipArsiv : Arsiv
         cagri.Kapat();
         iptal.ThrowIfCancellationRequested();
         if (cagri.Hata != null) throw cagri.Hata;
-        if (hr != S_OK) throw new ArsivHatasi($"Çıkarma başarısız (0x{hr:X8}).");
+        if (hr != S_OK) throw new ArsivHatasi(Dil.T("e_extract_fail", hr));
     }
 
     public override byte[]? Oku(Kayit kayit, long sinir, CancellationToken iptal = default)
@@ -139,8 +137,6 @@ public sealed unsafe class SevenZipArsiv : Arsiv
         if (cagri.Hata != null) throw cagri.Hata;
         return cagri.Bellek.ToArray();
     }
-
-    // ---------- geri çağrılar ----------
 
     [ComVisible(true)]
     public sealed class AcmaGeriCagri : IArchiveOpenCallback, ICryptoGetTextPassword
@@ -198,7 +194,7 @@ public sealed unsafe class SevenZipArsiv : Arsiv
             cikis = null;
             if (_iptal.IsCancellationRequested) return E_ABORT;
             if (!_kayitlar.TryGetValue(indeks, out var k)) return S_OK;
-            // Hata sonrası 7-Zip kalan kayıtları "test" kipinde (1) geçirir; sonucu yine bu kayda bağlayalım.
+            // after a wrong password 7z keeps going in test mode, still blame the right entry
             _suanki = k;
             if (kip != 0) return S_OK; // 0 = kExtract
             if (Bellek != null)
@@ -238,12 +234,12 @@ public sealed unsafe class SevenZipArsiv : Arsiv
                 if (SinirAsildi) return E_ABORT;
                 Hata ??= sonuc switch
                 {
-                    kWrongPassword => new SifreGerekliException("Şifre yanlış.", true),
-                    kDataError or kCRCError when k.Sifreli => new SifreGerekliException("Şifre yanlış.", !string.IsNullOrEmpty(_s.Sifre)),
-                    kUnsupportedMethod => new ArsivHatasi("Bu arşivde desteklenmeyen bir sıkıştırma yöntemi var: " + k.Ad),
-                    kUnexpectedEnd => new ArsivHatasi("Arşiv eksik ya da yarım inmiş: " + k.Ad),
-                    kHeadersError => new ArsivHatasi("Arşiv başlıkları bozuk."),
-                    _ => new ArsivHatasi("Dosya bozuk çıktı: " + k.Ad),
+                    kWrongPassword => new SifreGerekliException(Dil.T("e_wrong_pw"), true),
+                    kDataError or kCRCError when k.Sifreli => new SifreGerekliException(Dil.T("e_wrong_pw"), !string.IsNullOrEmpty(_s.Sifre)),
+                    kUnsupportedMethod => new ArsivHatasi(Dil.T("e_method", k.Ad)),
+                    kUnexpectedEnd => new ArsivHatasi(Dil.T("e_truncated", k.Ad)),
+                    kHeadersError => new ArsivHatasi(Dil.T("e_headers")),
+                    _ => new ArsivHatasi(Dil.T("e_corrupt_file", k.Ad)),
                 };
                 return E_ABORT;
             }
@@ -283,7 +279,7 @@ public sealed unsafe class SevenZipArsiv : Arsiv
         {
             if (string.IsNullOrEmpty(_s.Sifre))
             {
-                Hata ??= new SifreGerekliException("Bu arşiv şifreli.", false);
+                Hata ??= new SifreGerekliException(Dil.T("e_encrypted"), false);
                 sifre = IntPtr.Zero;
                 return E_ABORT;
             }
@@ -308,7 +304,7 @@ public sealed unsafe class SevenZipArsiv : Arsiv
             }
             catch (Exception ex)
             {
-                cagri.Hata ??= new ArsivHatasi("Diske yazılamadı: " + ex.Message);
+                cagri.Hata ??= new ArsivHatasi(Dil.T("e_disk", ex.Message));
                 return E_ABORT;
             }
         }
@@ -338,8 +334,6 @@ public sealed unsafe class SevenZipArsiv : Arsiv
         }
         public void Dispose() => _f.Dispose();
     }
-
-    // ---------- COM arabirimleri (7-Zip IArchive.h / IStream.h sırasıyla) ----------
 
     [ComImport, Guid("23170F69-40C1-278A-0000-000600600000"), InterfaceType(ComInterfaceType.InterfaceIsIUnknown)]
     public interface IInArchive

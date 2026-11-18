@@ -3,9 +3,6 @@ using Microsoft.Win32;
 
 namespace DafiumArsiv;
 
-/// <summary>Dosya Gezgini sağ tık menüsü. Sadece bu kullanıcı için (HKCU) yazılır, yönetici izni gerekmez,
-/// varsayılan "birlikte aç" programını değiştirmez. Kaldırınca her şey silinir.
-/// Windows 11'de bu öğeler "Diğer seçenekleri göster" altında çıkar.</summary>
 public static class Kabuk
 {
     const string Kok = @"Software\Classes";
@@ -25,23 +22,22 @@ public static class Kabuk
         var exe = Exe;
         var simge = $"\"{exe}\",0";
 
-        // "Birlikte aç" listesine ekle (varsayılanı değiştirmez)
         using (var p = Registry.CurrentUser.CreateSubKey($@"{Kok}\{ProgId}"))
         {
-            p.SetValue("", "Arşiv");
-            p.SetValue("FriendlyTypeName", "Arşiv");
+            p.SetValue("", Dil.T("shell_type"));
+            p.SetValue("FriendlyTypeName", Dil.T("shell_type"));
             using (var i = p.CreateSubKey("DefaultIcon")) i.SetValue("", simge);
             using (var c = p.CreateSubKey(@"shell\open\command")) c.SetValue("", $"\"{exe}\" \"%1\"");
         }
         foreach (var u in Uzantilar)
         {
+            // only adds to "open with", never touches the default app
             using (var o = Registry.CurrentUser.CreateSubKey($@"{Kok}\{u}\OpenWithProgids")) o.SetValue(ProgId, Array.Empty<byte>(), RegistryValueKind.None);
-            Ogesi($@"{Kok}\SystemFileAssociations\{u}\shell\DafiumArsiv.Ac", "Dafium Arşiv ile aç", simge, $"\"{exe}\" \"%1\"");
-            Ogesi($@"{Kok}\SystemFileAssociations\{u}\shell\DafiumArsiv.Yanina", "Dafium: Buraya çıkar", simge, $"\"{exe}\" --yanina \"%1\"");
+            Ogesi($@"{Kok}\SystemFileAssociations\{u}\shell\DafiumArsiv.Ac", Dil.T("shell_open"), simge, $"\"{exe}\" \"%1\"");
+            Ogesi($@"{Kok}\SystemFileAssociations\{u}\shell\DafiumArsiv.Yanina", Dil.T("shell_here"), simge, $"\"{exe}\" --yanina \"%1\"");
         }
-        // Her dosya ve klasör için "ZIP yap"
-        Ogesi($@"{Kok}\*\shell\DafiumArsiv.Zip", "Dafium: ZIP yap", simge, $"\"{exe}\" --zip \"%1\"");
-        Ogesi($@"{Kok}\Directory\shell\DafiumArsiv.Zip", "Dafium: ZIP yap", simge, $"\"{exe}\" --zip \"%1\"");
+        Ogesi($@"{Kok}\*\shell\DafiumArsiv.Zip", Dil.T("shell_zip"), simge, $"\"{exe}\" --zip \"%1\"");
+        Ogesi($@"{Kok}\Directory\shell\DafiumArsiv.Zip", Dil.T("shell_zip"), simge, $"\"{exe}\" --zip \"%1\"");
         Yenile();
     }
 

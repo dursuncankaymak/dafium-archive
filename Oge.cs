@@ -6,7 +6,6 @@ using DafiumArsiv.Motor;
 
 namespace DafiumArsiv;
 
-/// <summary>Listede görünen satır: arşivdeki bir dosya ya da (gerçek veya yoldan türetilen) klasör.</summary>
 public sealed class Oge
 {
     public required string Ad { get; init; }
@@ -23,14 +22,13 @@ public sealed class Oge
     public string Simge => TurBilgisi.Simge;
     public Brush SimgeRenk => TurBilgisi.Renk;
     public Brush SimgeZemin => TurBilgisi.Zemin;
-    public string Tur => TurBilgisi.Ad;
+    public string Tur => Dil.T(TurBilgisi.Ad, TurBilgisi.Uzanti);
     public string BoyutYazi => Klasor && Boyut == 0 ? "" : Bicim.Boyut(Boyut);
     public string PaketliYazi => Paketli < 0 ? "" : Bicim.Boyut(Paketli);
-    public string TarihYazi => Tarih?.ToString("dd.MM.yyyy HH:mm") ?? "";
+    public string TarihYazi => Tarih?.ToString(Dil.Tr ? "dd.MM.yyyy HH:mm" : "yyyy-MM-dd HH:mm") ?? "";
     public FontWeight Kalinlik => Klasor ? FontWeights.SemiBold : FontWeights.Normal;
     public Visibility SifreGorunum => Sifreli ? Visibility.Visible : Visibility.Collapsed;
 
-    // Ekran okuyucular ve UI Automation satırı adıyla görsün
     public override string ToString() => Ad;
 }
 
@@ -41,7 +39,7 @@ public sealed class KonumParcasi
     public Visibility AyracGorunum { get; init; }
 }
 
-public sealed record Tur(string Ad, string Simge, Brush Renk, Brush Zemin, string Grup);
+public sealed record Tur(string Ad, string Simge, Brush Renk, Brush Zemin, string Grup, string Uzanti = "");
 
 public static class Turler
 {
@@ -56,15 +54,15 @@ public static class Turler
 
     static Tur T(string ad, string simge, string renk, string grup) => new(ad, simge, F(renk), F(renk, 38), grup);
 
-    public static readonly Tur Klasor = T("Klasör", "", "#FFD166", "klasor");
-    static readonly Tur Resim = T("Resim", "", "#4BE3B0", "resim");
-    static readonly Tur Video = T("Video", "", "#FF7AA8", "video");
-    static readonly Tur Ses = T("Ses", "", "#3EE7FF", "ses");
-    static readonly Tur ArsivT = T("Arşiv", "", "#B7A6FF", "arsiv");
-    static readonly Tur Program = T("Program", "", "#FF9A3D", "program");
-    static readonly Tur Kod = T("Kod", "", "#9FD8FF", "kod");
-    static readonly Tur Belge = T("Belge", "", "#FF8A96", "belge");
-    static readonly Tur Yazi = T("Metin", "", "#DCD8EF", "yazi");
+    public static readonly Tur Klasor = T("t_folder", "", "#FFD166", "klasor");
+    static readonly Tur Resim = T("t_image", "", "#4BE3B0", "resim");
+    static readonly Tur Video = T("t_video", "", "#FF7AA8", "video");
+    static readonly Tur Ses = T("t_audio", "", "#3EE7FF", "ses");
+    static readonly Tur ArsivT = T("t_archive", "", "#B7A6FF", "arsiv");
+    static readonly Tur Program = T("t_program", "", "#FF9A3D", "program");
+    static readonly Tur Kod = T("t_code", "", "#9FD8FF", "kod");
+    static readonly Tur Belge = T("t_document", "", "#FF8A96", "belge");
+    static readonly Tur Yazi = T("t_text", "", "#DCD8EF", "yazi");
 
     static readonly Dictionary<string, Tur> Uzanti = new(StringComparer.OrdinalIgnoreCase);
 
@@ -85,7 +83,7 @@ public static class Turler
     {
         var u = Path.GetExtension(ad).TrimStart('.');
         if (u.Length > 0 && Uzanti.TryGetValue(u, out var t)) return t;
-        return new Tur(u.Length > 0 ? u.ToUpperInvariant() + " dosyası" : "Dosya", "", F("#9A94BF"), F("#9A94BF", 38), "diger");
+        return new Tur(u.Length > 0 ? "t_ext_file" : "t_file", "", F("#9A94BF"), F("#9A94BF", 38), "diger", u.ToUpperInvariant());
     }
 
     public static bool ResimMi(string ad) => Bul(ad).Grup == "resim" && !ad.EndsWith(".svg", StringComparison.OrdinalIgnoreCase)
@@ -97,8 +95,6 @@ public static class Turler
 
 public static class Bicim
 {
-    static readonly CultureInfo Tr = CultureInfo.GetCultureInfo("tr-TR");
-
     public static string Boyut(long b)
     {
         if (b < 1024) return b + " B";
@@ -106,16 +102,17 @@ public static class Bicim
         double d = b;
         int i = -1;
         do { d /= 1024; i++; } while (d >= 1024 && i < b2.Length - 1);
-        return d.ToString(d >= 100 ? "0" : d >= 10 ? "0.#" : "0.##", Tr) + " " + b2[i];
+        return d.ToString(d >= 100 ? "0" : d >= 10 ? "0.#" : "0.##", Dil.Kultur) + " " + b2[i];
     }
 
     public static string Sure(double saniye)
     {
         if (double.IsNaN(saniye) || double.IsInfinity(saniye) || saniye < 0) return "";
-        if (saniye < 60) return Math.Ceiling(saniye) + " sn";
-        if (saniye < 3600) return (int)(saniye / 60) + " dk " + (int)(saniye % 60) + " sn";
-        return (int)(saniye / 3600) + " sa " + (int)(saniye % 3600 / 60) + " dk";
+        string sn = Dil.T("u_s"), dk = Dil.T("u_min"), sa = Dil.T("u_h");
+        if (saniye < 60) return $"{Math.Ceiling(saniye)} {sn}";
+        if (saniye < 3600) return $"{(int)(saniye / 60)} {dk} {(int)(saniye % 60)} {sn}";
+        return $"{(int)(saniye / 3600)} {sa} {(int)(saniye % 3600 / 60)} {dk}";
     }
 
-    public static string Sayi(long n) => n.ToString("N0", Tr);
+    public static string Sayi(long n) => n.ToString("N0", Dil.Kultur);
 }

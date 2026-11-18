@@ -28,7 +28,6 @@ A=../arsivler
 tar -czf $A/paket.tar.gz .
 gzip -c "türkçe ad ğüş.txt" > $A/tek.txt.gz
 "$Z" a -bso0 -bsp0 -txz $A/tek2.txt.xz "türkçe ad ğüş.txt"
-# Kötü niyetli yollar (zip slip) — hedef klasörün dışına yazılmamalı
 python -c "
 import zipfile
 z=zipfile.ZipFile(r'../arsivler/kacak.zip','w')

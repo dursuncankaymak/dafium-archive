@@ -2,19 +2,15 @@ using System.IO;
 
 namespace DafiumArsiv.Motor;
 
-/// <summary>Arşivdeki tek bir kayıt (dosya ya da klasör). Yol her zaman '/' ile ayrılır.</summary>
 public sealed class Kayit
 {
     public required string Yol { get; init; }
     public long Boyut { get; init; }
-    /// <summary>Sıkıştırılmış boyut; motor bilmiyorsa -1.</summary>
     public long Paketli { get; init; } = -1;
     public DateTime? Tarih { get; init; }
     public bool Klasor { get; init; }
     public bool Sifreli { get; init; }
-    /// <summary>Bağlantı (symlink/hardlink) kayıtları çıkarılmaz; güvenlik için atlanır.</summary>
     public bool Baglanti { get; init; }
-    /// <summary>Motorun kendi sırası (arşivdeki konumu).</summary>
     public int Sira { get; init; }
 
     public string Ad => Yol.Contains('/') ? Yol[(Yol.LastIndexOf('/') + 1)..] : Yol;
@@ -24,7 +20,6 @@ public readonly record struct Ilerleme(long Yazilan, long Toplam, string Dosya, 
 
 public sealed class SifreGerekliException(string mesaj, bool yanlis) : Exception(mesaj)
 {
-    /// <summary>true: şifre verildi ama yanlış. false: hiç şifre verilmedi.</summary>
     public bool Yanlis { get; } = yanlis;
 }
 
@@ -38,20 +33,17 @@ public abstract class Arsiv : IDisposable
 
     protected Arsiv(string yol) => Yol = yol;
 
-    /// <summary>İçeriği okur. Başlıkları şifreli arşivde şifre yoksa SifreGerekliException atar.</summary>
     public abstract List<Kayit> Listele(CancellationToken iptal = default);
 
-    /// <summary>secili null ise hepsini çıkarır. Yollar her zaman hedef klasörün içinde kalır.</summary>
     public abstract void Cikar(IReadOnlyCollection<Kayit>? secili, string hedef, IProgress<Ilerleme>? ilerleme, CancellationToken iptal);
 
-    /// <summary>Önizleme için tek kaydı belleğe okur; sinir aşılırsa null.</summary>
     public abstract byte[]? Oku(Kayit kayit, long sinir, CancellationToken iptal = default);
 
     public virtual void Dispose() { }
 
     public static Arsiv Ac(string yol)
     {
-        if (!File.Exists(yol)) throw new ArsivHatasi("Dosya bulunamadı.");
+        if (!File.Exists(yol)) throw new ArsivHatasi(Dil.T("e_not_found"));
         if (RarMi(yol)) return new UnrarArsiv(IlkCilt(yol));
         if (YediMi(yol) && SevenZipArsiv.Var()) return new SevenZipArsiv(yol);
         return new LibarchiveArsiv(yol);
@@ -62,7 +54,6 @@ public abstract class Arsiv : IDisposable
         Span<byte> b = stackalloc byte[7];
         using var f = File.OpenRead(yol);
         int n = f.Read(b);
-        // RAR 1.5-4.x: "Rar!\x1A\x07\x00", RAR 5: "Rar!\x1A\x07\x01"
         return n == 7 && b[0] == 0x52 && b[1] == 0x61 && b[2] == 0x72 && b[3] == 0x21 && b[4] == 0x1A && b[5] == 0x07;
     }
 
@@ -70,11 +61,10 @@ public abstract class Arsiv : IDisposable
     {
         Span<byte> b = stackalloc byte[6];
         using var f = File.OpenRead(yol);
-        // 7z imzası: '7' 'z' BC AF 27 1C
         return f.Read(b) == 6 && b[0] == 0x37 && b[1] == 0x7A && b[2] == 0xBC && b[3] == 0xAF && b[4] == 0x27 && b[5] == 0x1C;
     }
 
-    /// <summary>"film.part3.rar" açıldıysa "film.part1.rar" (ya da part01/001) varsa onu döner.</summary>
+    // opening part3 should still start from part1
     static string IlkCilt(string yol)
     {
         var ad = Path.GetFileName(yol);
@@ -86,7 +76,6 @@ public abstract class Arsiv : IDisposable
     }
 }
 
-/// <summary>Arşivden gelen yolu hedef klasörün içinde güvenli bir yola çevirir ("zip slip" koruması).</summary>
 public static class Guvenli
 {
     static readonly char[] Yasak = Path.GetInvalidFileNameChars();
@@ -102,8 +91,9 @@ public static class Guvenli
         foreach (var ham in arsivYolu.Replace('\\', '/').Split('/', StringSplitOptions.RemoveEmptyEntries))
         {
             var p = ham.Trim();
-            if (p is "." or "..") continue;                 // üst klasöre çıkışlar atılır
-            if (p.Length == 2 && p[1] == ':') continue;      // "C:" gibi sürücü ekleri atılır
+            // zip slip: drop .. and drive letters
+            if (p is "." or "..") continue;
+            if (p.Length == 2 && p[1] == ':') continue;
             var temiz = new string(p.Select(c => Array.IndexOf(Yasak, c) >= 0 ? '_' : c).ToArray()).TrimEnd('.', ' ');
             if (temiz.Length == 0) continue;
             var kok = temiz.Contains('.') ? temiz[..temiz.IndexOf('.')] : temiz;
@@ -116,11 +106,11 @@ public static class Guvenli
     public static string HedefYol(string hedefKok, string arsivYolu)
     {
         var goreli = Normallestir(arsivYolu);
-        if (goreli.Length == 0) throw new ArsivHatasi("Geçersiz dosya adı: " + arsivYolu);
+        if (goreli.Length == 0) throw new ArsivHatasi(Dil.T("e_bad_name", arsivYolu));
         var kok = Path.GetFullPath(hedefKok).TrimEnd(Path.DirectorySeparatorChar) + Path.DirectorySeparatorChar;
         var tam = Path.GetFullPath(Path.Combine(kok, goreli.Replace('/', Path.DirectorySeparatorChar)));
         if (!tam.StartsWith(kok, StringComparison.OrdinalIgnoreCase))
-            throw new ArsivHatasi("Hedef klasörün dışına yazmaya çalışan kayıt atlandı: " + arsivYolu);
+            throw new ArsivHatasi(Dil.T("e_slip", arsivYolu));
         return tam;
     }
 }

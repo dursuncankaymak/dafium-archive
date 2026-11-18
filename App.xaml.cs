@@ -9,6 +9,7 @@ public partial class App : Application
     protected override void OnStartup(StartupEventArgs e)
     {
         base.OnStartup(e);
+        Dil.Yukle();
         DispatcherUnhandledException += Beklenmeyen;
         string? yanina = null;
         var ziple = new List<string>();
@@ -37,6 +38,6 @@ public partial class App : Application
             File.AppendAllText(Path.Combine(klasor, "hata.log"), $"{DateTime.Now:yyyy-MM-dd HH:mm:ss}\n{e.Exception}\n\n");
         }
         catch { }
-        MessageBox.Show("Beklenmeyen bir hata oldu:\n" + e.Exception.Message, "Dafium Arşiv", MessageBoxButton.OK, MessageBoxImage.Error);
+        MessageBox.Show(Dil.T("unexpected", e.Exception.Message), Dil.T("app"), MessageBoxButton.OK, MessageBoxImage.Error);
     }
 }
