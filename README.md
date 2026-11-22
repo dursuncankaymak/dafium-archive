@@ -5,6 +5,11 @@
 <h1 align="center">Dafium Archive</h1>
 
 <p align="center">
+  <a href="../../releases/latest"><img src="https://img.shields.io/github/v/release/dursuncankaymak/dafium-archive" alt="Release"></a>
+  <a href="LICENSE"><img src="https://img.shields.io/badge/license-MIT-blue" alt="MIT"></a>
+</p>
+
+<p align="center">
   A fast, ad-free, good-looking archive manager for Windows. Opens RAR, ZIP, 7z and more.<br>
   <i>Türkçe açıklama aşağıda.</i>
 </p>
@@ -63,7 +68,7 @@ dotnet run --project testler/MotorTestleri -c Release -- /tmp/dafium-test
 
 ## Contributing
 
-Reviews, bug reports and PRs are very welcome, see [CONTRIBUTING.md](CONTRIBUTING.md). Places that could use a second pair of eyes:
+Reviews, bug reports and PRs are very welcome, see [CONTRIBUTING.md](CONTRIBUTING.md). Security issues: [SECURITY.md](SECURITY.md). Places that could use a second pair of eyes:
 
 - the native interop in `Motor/UnrarArsiv.cs` and `Motor/SevenZipArsiv.cs`
 - the `Guvenli` class in `Motor/Arsiv.cs` (path sanitizing / zip slip)

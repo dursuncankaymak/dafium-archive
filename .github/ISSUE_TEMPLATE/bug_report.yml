@@ -1,0 +1,28 @@
+name: Bug report
+description: Something doesn't work as expected
+labels: [bug]
+body:
+  - type: input
+    id: version
+    attributes:
+      label: Dafium Archive version
+      placeholder: "1.0.0"
+    validations:
+      required: true
+  - type: input
+    id: windows
+    attributes:
+      label: Windows version
+      placeholder: "Windows 11 24H2"
+  - type: input
+    id: format
+    attributes:
+      label: Archive format
+      placeholder: "RAR5, encrypted, multi-part"
+  - type: textarea
+    id: what
+    attributes:
+      label: What happened?
+      description: Steps to reproduce, what you expected, what you got. Please don't attach private or copyrighted archives.
+    validations:
+      required: true
