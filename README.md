@@ -5,6 +5,7 @@
 <h1 align="center">Dafium Archive</h1>
 
 <p align="center">
+  <a href="../../actions/workflows/build.yml"><img src="https://github.com/dursuncankaymak/dafium-archive/actions/workflows/build.yml/badge.svg" alt="Build"></a>
   <a href="../../releases/latest"><img src="https://img.shields.io/github/v/release/dursuncankaymak/dafium-archive" alt="Release"></a>
   <a href="LICENSE"><img src="https://img.shields.io/badge/license-MIT-blue" alt="MIT"></a>
 </p>
